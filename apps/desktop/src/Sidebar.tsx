@@ -34,7 +34,7 @@ export function Sidebar({
   onCreateFolder,
 }: SidebarProps) {
   const t = useT();
-  const folderName = rootPath.split("/").pop() ?? rootPath;
+  const folderName = rootPath.split(/[/\\]/).filter(Boolean).pop() ?? rootPath;
   const treeContainerRef = useRef<HTMLDivElement>(null);
   const [treeHeight, setTreeHeight] = useState(400);
   const { viewMode, setViewMode, dueCards } = useAppStore();

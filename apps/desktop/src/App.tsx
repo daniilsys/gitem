@@ -14,17 +14,17 @@ import { Sidebar } from "./Sidebar";
 import { getTheme, getAccent, applyTheme } from "./themes";
 
 function getParentDir(filePath: string): string {
-  const idx = filePath.lastIndexOf("/");
+  const idx = Math.max(filePath.lastIndexOf("/"), filePath.lastIndexOf("\\"));
   return idx > 0 ? filePath.substring(0, idx) : filePath;
 }
 
 function getFileName(filePath: string): string {
-  return filePath.split("/").pop() ?? filePath;
+  return filePath.split(/[/\\]/).filter(Boolean).pop() ?? filePath;
 }
 
 function getBreadcrumb(filePath: string, rootPath: string): string[] {
-  const relative = filePath.replace(rootPath, "").replace(/^\//, "");
-  const parts = relative.split("/");
+  const relative = filePath.replace(rootPath, "").replace(/^[/\\]/, "");
+  const parts = relative.split(/[/\\]/);
   return parts.map((p) => p.replace(/\.md$/, ""));
 }
 

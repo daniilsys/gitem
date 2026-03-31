@@ -31,14 +31,14 @@ function estimateIntervals(card: Card) {
 }
 
 function breadcrumb(filePath: string): string {
-  const parts = filePath.split("/");
+  const parts = filePath.split(/[/\\]/);
   const relevant = parts.slice(-2);
   return relevant.map((p) => p.replace(/\.md$/, "")).join(" › ");
 }
 
 function getDeckFromPath(filePath: string, rootPath: string): string {
-  const relative = filePath.replace(rootPath, "").replace(/^\//, "");
-  const first = relative.split("/")[0];
+  const relative = filePath.replace(rootPath, "").replace(/^[/\\]/, "");
+  const first = relative.split(/[/\\]/)[0];
   return first.endsWith(".md") ? "root" : first;
 }
 
