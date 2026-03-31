@@ -1,0 +1,14 @@
+{
+  "name": "gitem",
+  "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "scripts": {
+    "dev": "pnpm --filter @gitem/desktop dev",
+    "build": "pnpm --filter @gitem/ui build && pnpm --filter @gitem/desktop build",
+    "tauri": "pnpm --filter @gitem/desktop tauri"
+  }
+}
