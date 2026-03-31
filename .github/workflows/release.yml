@@ -75,7 +75,7 @@ jobs:
             ```bash
             xattr -cr /Applications/Gitem.app
             ```
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           projectPath: apps/desktop
           tauriScript: pnpm tauri
