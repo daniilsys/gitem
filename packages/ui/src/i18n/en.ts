@@ -45,6 +45,7 @@ export const en: Translations = {
   "editor.hr": "Horizontal rule",
   "editor.table": "Table",
   "editor.flashcard": "Flashcard",
+  "editor.continueEditing": "Continue editing",
   "review.title": "Review",
   "review.allCaughtUp": "All caught up!",
   "review.nextReview": "Next review on {{date}}",

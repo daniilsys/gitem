@@ -43,6 +43,7 @@ export type TKey =
   | "editor.hr"
   | "editor.table"
   | "editor.flashcard"
+  | "editor.continueEditing"
   | "review.title"
   | "review.allCaughtUp"
   | "review.nextReview"

@@ -41,6 +41,7 @@ interface AppState {
   accentId: string;
   locale: string | null;
   spellcheck: boolean;
+  lastOpenedFile: string | null;
   autoCapitalize: boolean;
   setRootPath: (path: string | null) => void;
   setSelectedFile: (path: string | null) => void;
@@ -53,6 +54,7 @@ interface AppState {
   setLocale: (locale: string | null) => void;
   setSpellcheck: (v: boolean) => void;
   setAutoCapitalize: (v: boolean) => void;
+  setLastOpenedFile: (path: string | null) => void;
   setSelectedDeck: (deck: string | null) => void;
   fetchDecks: () => Promise<void>;
   setFileContent: (path: string, content: string) => void;
@@ -77,6 +79,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   locale: null,
   spellcheck: true,
   autoCapitalize: true,
+  lastOpenedFile: null,
   setRootPath: (path) =>
     set({
       rootPath: path,
@@ -99,6 +102,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAccent: (id) => set({ accentId: id }),
   setLocale: (locale) => set({ locale }),
   setSpellcheck: (v) => set({ spellcheck: v }),
+  setLastOpenedFile: (path) => set({ lastOpenedFile: path }),
   setAutoCapitalize: (v) => set({ autoCapitalize: v }),
   fetchDecks: async () => {
     const { rootPath } = get();

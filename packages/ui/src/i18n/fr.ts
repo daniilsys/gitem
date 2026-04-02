@@ -53,6 +53,7 @@ export const fr: Translations = {
   "editor.hr": "Séparateur horizontal",
   "editor.table": "Tableau",
   "editor.flashcard": "Flashcard",
+  "editor.continueEditing": "Reprendre vos notes",
   "review.title": "Révision",
   "review.allCaughtUp": "Vous êtes à jour !",
   "review.nextReview": "Prochaine révision le {{date}}",

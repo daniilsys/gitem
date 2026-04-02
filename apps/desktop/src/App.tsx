@@ -30,7 +30,7 @@ function getBreadcrumb(filePath: string, rootPath: string): string[] {
 
 export function App() {
   const t = useT();
-  const { rootPath, selectedFile, isDirty, viewMode, fileContents, editorZoom, themeId, accentId, setRootPath, setSelectedFile, syncCards, zoomIn, zoomOut, zoomReset, setTheme, setAccent, setLocale, setSpellcheck, setAutoCapitalize } =
+  const { rootPath, selectedFile, isDirty, viewMode, fileContents, editorZoom, themeId, accentId, lastOpenedFile, setRootPath, setSelectedFile, syncCards, zoomIn, zoomOut, zoomReset, setTheme, setAccent, setLocale, setSpellcheck, setAutoCapitalize, setLastOpenedFile } =
     useAppStore();
   const [tree, setTree] = useState<TreeNode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +61,8 @@ export function App() {
       const savedAutoCap = await store.get<boolean>("autoCapitalize");
       if (savedSpellcheck !== null && savedSpellcheck !== undefined) setSpellcheck(savedSpellcheck);
       if (savedAutoCap !== null && savedAutoCap !== undefined) setAutoCapitalize(savedAutoCap);
+      const savedLastFile = await store.get<string>("lastOpenedFile");
+      if (savedLastFile) setLastOpenedFile(savedLastFile);
       const hasOnboarded = await store.get<boolean>("hasOnboarded");
       if (!hasOnboarded && !saved) {
         setShowOnboarding(true);
@@ -97,6 +99,16 @@ export function App() {
       setRootPath(selected);
     }
   }, [setRootPath]);
+
+  const handleFileSelect = useCallback(async (path: string | null) => {
+    setSelectedFile(path);
+    if (path) {
+      setLastOpenedFile(path);
+      const store = await load("settings.json");
+      await store.set("lastOpenedFile", path);
+      await store.save();
+    }
+  }, [setSelectedFile, setLastOpenedFile]);
 
   const getActiveDir = useCallback((): string => {
     if (!rootPath) return "";
@@ -228,7 +240,7 @@ export function App() {
       <Sidebar
         tree={tree}
         selectedFile={selectedFile}
-        onFileSelect={setSelectedFile}
+        onFileSelect={handleFileSelect}
         onChangeFolder={handleOpenFolder}
         onMove={handleMove}
         onRename={handleRename}
@@ -313,6 +325,18 @@ export function App() {
                 {t("editor.selectNoteHint")}
               </p>
             </div>
+            {lastOpenedFile && (
+              <button
+                onClick={() => handleFileSelect(lastOpenedFile)}
+                className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-accent/20 bg-accent/[0.06] px-5 py-3 transition-all duration-150 hover:border-accent/30 hover:bg-accent/10 active:scale-[0.98]"
+              >
+                <FileText size={15} strokeWidth={1.8} className="text-accent" />
+                <div className="flex flex-col items-start">
+                  <span className="text-[13px] font-medium text-accent">{t("editor.continueEditing")}</span>
+                  <span className="text-[11px] text-text-muted">{getFileName(lastOpenedFile).replace(/\.md$/, "")}</span>
+                </div>
+              </button>
+            )}
             <div className="flex items-center gap-3 rounded-lg bg-white/[0.02] px-4 py-2.5 ring-1 ring-white/[0.04]">
               <span className="text-[11px] font-medium text-accent">{t("editor.tip")}</span>
               <span className="text-[11px] text-text-muted">{t("editor.flashcardHint")}</span>
