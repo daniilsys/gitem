@@ -43,7 +43,7 @@ export function CreateDialog({ type, onSubmit, onCancel }: CreateDialogProps) {
         if (e.target === overlayRef.current) onCancel();
       }}
     >
-      <div className="animate-dialog w-[360px] rounded-2xl border border-white/[0.08] bg-[#141820] p-6 shadow-2xl shadow-black/70">
+      <div className="animate-dialog w-[360px] rounded-2xl border border-white/[0.08] bg-panel p-6 shadow-2xl shadow-black/70">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10">
             <Icon size={18} strokeWidth={1.8} className="text-accent" />

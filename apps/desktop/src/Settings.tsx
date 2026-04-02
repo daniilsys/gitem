@@ -37,9 +37,13 @@ export function Settings() {
     accentId,
     locale,
     editorZoom,
+    spellcheck,
+    autoCapitalize,
     setTheme,
     setAccent,
     setLocale,
+    setSpellcheck,
+    setAutoCapitalize,
     zoomIn,
     zoomOut,
     zoomReset,
@@ -53,6 +57,13 @@ export function Settings() {
   const handleTheme = (id: string) => {
     setTheme(id);
     persistSettings(id, accentId);
+  };
+
+  const handleToggle = async (key: string, value: boolean, setter: (v: boolean) => void) => {
+    setter(value);
+    const store = await load("settings.json");
+    await store.set(key, value);
+    await store.save();
   };
 
   const handleAccent = (id: string) => {
@@ -197,6 +208,23 @@ export function Settings() {
           </section>
 
           <section>
+            <div className="mt-4 space-y-3">
+              <ToggleRow
+                label={t("settings.spellcheck")}
+                desc={t("settings.spellcheckDesc")}
+                value={spellcheck}
+                onChange={(v) => handleToggle("spellcheck", v, setSpellcheck)}
+              />
+              <ToggleRow
+                label={t("settings.autoCapitalize")}
+                desc={t("settings.autoCapitalizeDesc")}
+                value={autoCapitalize}
+                onChange={(v) => handleToggle("autoCapitalize", v, setAutoCapitalize)}
+              />
+            </div>
+          </section>
+
+          <section>
             <SectionHeader icon={<Info size={16} />} title={t("settings.about")} />
             <div className="mt-4 rounded-xl bg-white/[0.02] px-5 py-4 ring-1 ring-white/[0.04]">
               <div className="flex items-center gap-3">
@@ -287,5 +315,38 @@ function ThemeCard({
         </span>
       </div>
     </button>
+  );
+}
+
+function ToggleRow({
+  label,
+  desc,
+  value,
+  onChange,
+}: {
+  label: string;
+  desc: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-xl bg-white/[0.02] px-5 py-4 ring-1 ring-white/[0.04]">
+      <div>
+        <p className="text-[13px] font-medium text-text-primary">{label}</p>
+        <p className="mt-0.5 text-[12px] text-text-muted">{desc}</p>
+      </div>
+      <button
+        onClick={() => onChange(!value)}
+        className={`relative h-6 w-11 cursor-pointer rounded-full transition-colors duration-200 ${
+          value ? "bg-accent" : "bg-white/[0.1]"
+        }`}
+      >
+        <div
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            value ? "translate-x-5" : "translate-x-0.5"
+          }`}
+        />
+      </button>
+    </div>
   );
 }

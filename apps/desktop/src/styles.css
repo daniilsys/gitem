@@ -13,6 +13,7 @@
   --color-text-primary: #e8eaed;
   --color-text-secondary: #9aa5b4;
   --color-text-muted: #4a5568;
+  --color-panel: #141820;
 }
 
 html, body, #root {

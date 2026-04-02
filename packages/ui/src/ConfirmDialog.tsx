@@ -42,7 +42,7 @@ export function ConfirmDialog({
         if (e.target === overlayRef.current) onCancel();
       }}
     >
-      <div className="animate-dialog w-[340px] rounded-2xl border border-white/[0.08] bg-[#141820] p-6 shadow-2xl shadow-black/70">
+      <div className="animate-dialog w-[340px] rounded-2xl border border-white/[0.08] bg-panel p-6 shadow-2xl shadow-black/70">
         <h3 className="text-[15px] font-semibold text-text-primary">{title}</h3>
         <p className="mt-2.5 text-[13px] leading-relaxed text-text-secondary">
           {message}

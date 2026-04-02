@@ -173,7 +173,7 @@ function buildContextMenu(
   const menu = document.createElement("div");
   menu.setAttribute("data-gitem-ctx", "");
   menu.className =
-    "animate-menu fixed z-[999] w-52 overflow-hidden rounded-xl border border-white/[0.08] bg-[#141820] py-1.5 shadow-2xl shadow-black/60";
+    "animate-menu fixed z-[999] w-52 overflow-hidden rounded-xl border border-white/[0.08] bg-panel py-1.5 shadow-2xl shadow-black/60";
   menu.style.left = `${e.clientX}px`;
   menu.style.top = `${e.clientY}px`;
 

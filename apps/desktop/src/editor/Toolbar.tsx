@@ -202,7 +202,7 @@ function ToolbarButton({
       {show && createPortal(
         <div
           ref={positionTip}
-          className="pointer-events-none fixed z-[9999] whitespace-nowrap rounded-lg border border-white/[0.08] bg-[#141820] px-3 py-2 shadow-xl shadow-black/50"
+          className="pointer-events-none fixed z-[9999] whitespace-nowrap rounded-lg border border-white/[0.08] bg-panel px-3 py-2 shadow-xl shadow-black/50"
           style={{ opacity: 0 }}
         >
           {item.shortcut && (

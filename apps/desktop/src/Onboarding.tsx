@@ -53,7 +53,7 @@ export function Onboarding({ onComplete, onOpenFolder }: OnboardingProps) {
   const isLast = step === steps.length - 1;
 
   return (
-    <div className="flex h-screen items-center justify-center bg-bg">
+    <div className="flex h-full items-center justify-center bg-bg">
       <div className="flex w-full max-w-md flex-col items-center gap-8 px-8">
         <div className="relative">
           <div

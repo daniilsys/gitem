@@ -40,6 +40,8 @@ interface AppState {
   themeId: string;
   accentId: string;
   locale: string | null;
+  spellcheck: boolean;
+  autoCapitalize: boolean;
   setRootPath: (path: string | null) => void;
   setSelectedFile: (path: string | null) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -49,6 +51,8 @@ interface AppState {
   setTheme: (id: string) => void;
   setAccent: (id: string) => void;
   setLocale: (locale: string | null) => void;
+  setSpellcheck: (v: boolean) => void;
+  setAutoCapitalize: (v: boolean) => void;
   setSelectedDeck: (deck: string | null) => void;
   fetchDecks: () => Promise<void>;
   setFileContent: (path: string, content: string) => void;
@@ -71,6 +75,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   themeId: "midnight",
   accentId: "violet",
   locale: null,
+  spellcheck: true,
+  autoCapitalize: true,
   setRootPath: (path) =>
     set({
       rootPath: path,
@@ -92,6 +98,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setTheme: (id) => set({ themeId: id }),
   setAccent: (id) => set({ accentId: id }),
   setLocale: (locale) => set({ locale }),
+  setSpellcheck: (v) => set({ spellcheck: v }),
+  setAutoCapitalize: (v) => set({ autoCapitalize: v }),
   fetchDecks: async () => {
     const { rootPath } = get();
     if (!rootPath) return;

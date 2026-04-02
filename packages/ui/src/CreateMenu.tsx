@@ -41,7 +41,7 @@ export function CreateMenu({ onCreateNote, onCreateFolder, onChangeFolder }: Cre
         <Plus size={16} strokeWidth={2.5} />
       </button>
       {open && (
-        <div className="animate-menu absolute right-0 top-full z-50 mt-1.5 w-48 overflow-hidden rounded-xl border border-white/[0.08] bg-[#141820] py-1 shadow-xl shadow-black/50">
+        <div className="animate-menu absolute right-0 top-full z-50 mt-1.5 w-48 overflow-hidden rounded-xl border border-white/[0.08] bg-panel py-1 shadow-xl shadow-black/50">
           <button
             onClick={() => { onCreateNote(); setOpen(false); }}
             className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-[13px] text-text-primary transition-colors duration-100 hover:bg-white/5"

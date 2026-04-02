@@ -91,7 +91,14 @@ function buildDecorations(view: EditorView): DecorationSet {
     while (pos <= to) {
       const line = state.doc.lineAt(pos);
 
-      if (!active.has(line.number)) {
+      if (active.has(line.number)) {
+        const hm = line.text.match(/^(#{1,6})\s/);
+        if (hm && headingStyles[hm[1].length]) {
+          rangeDecos.push(
+            Decoration.mark({ class: headingStyles[hm[1].length] }).range(line.from, line.from + line.text.length),
+          );
+        }
+      } else if (!active.has(line.number)) {
         if (isTableLine(line.text)) {
           let isHeader = false;
           if (!isTableSeparator(line.text) && line.number < state.doc.lines) {
@@ -182,7 +189,6 @@ function decorateInline(
     { regex: /\*\*(.+?)\*\*/g, delimLen: 2, cls: "cm-wysiwyg-bold" },
     { regex: /(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, delimLen: 1, cls: "cm-wysiwyg-italic" },
     { regex: /~~(.+?)~~/g, delimLen: 2, cls: "cm-wysiwyg-strike" },
-    { regex: /==(.+?)==/g, delimLen: 2, cls: "cm-wysiwyg-highlight" },
     { regex: /`([^`]+)`/g, delimLen: 1, cls: "cm-wysiwyg-code" },
   ];
 
@@ -209,6 +215,34 @@ function decorateInline(
         Decoration.replace({}).range(contentEnd, matchEnd),
       );
     }
+  }
+
+  const highlightColors: Record<string, string> = {
+    r: "cm-wysiwyg-highlight-r",
+    g: "cm-wysiwyg-highlight-g",
+    b: "cm-wysiwyg-highlight-b",
+    p: "cm-wysiwyg-highlight-p",
+    o: "cm-wysiwyg-highlight-o",
+  };
+  const hlRegex = /==(?:([rgbpo]):)?(.+?)==/g;
+  hlRegex.lastIndex = 0;
+  let hm;
+  while ((hm = hlRegex.exec(text))) {
+    const matchStart = lineFrom + hm.index;
+    const matchEnd = matchStart + hm[0].length;
+    const colorPrefix = hm[1];
+    const cls = colorPrefix ? highlightColors[colorPrefix] : "cm-wysiwyg-highlight";
+    const delimOpen = colorPrefix ? 2 + colorPrefix.length + 1 : 2;
+
+    decorations.push(
+      Decoration.replace({}).range(matchStart, matchStart + delimOpen),
+    );
+    decorations.push(
+      Decoration.mark({ class: cls }).range(matchStart + delimOpen, matchEnd - 2),
+    );
+    decorations.push(
+      Decoration.replace({}).range(matchEnd - 2, matchEnd),
+    );
   }
 
   const clozeRegex = /@@([^@]+?)(?:::([^@]+?))?@@/g;

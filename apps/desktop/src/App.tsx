@@ -30,7 +30,7 @@ function getBreadcrumb(filePath: string, rootPath: string): string[] {
 
 export function App() {
   const t = useT();
-  const { rootPath, selectedFile, isDirty, viewMode, fileContents, editorZoom, themeId, accentId, setRootPath, setSelectedFile, syncCards, zoomIn, zoomOut, zoomReset, setTheme, setAccent, setLocale } =
+  const { rootPath, selectedFile, isDirty, viewMode, fileContents, editorZoom, themeId, accentId, setRootPath, setSelectedFile, syncCards, zoomIn, zoomOut, zoomReset, setTheme, setAccent, setLocale, setSpellcheck, setAutoCapitalize } =
     useAppStore();
   const [tree, setTree] = useState<TreeNode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +57,10 @@ export function App() {
       if (savedAccent) setAccent(savedAccent);
       if (savedLocale) setLocale(savedLocale);
       applyTheme(getTheme(savedTheme ?? "midnight"), getAccent(savedAccent ?? "violet"));
+      const savedSpellcheck = await store.get<boolean>("spellcheck");
+      const savedAutoCap = await store.get<boolean>("autoCapitalize");
+      if (savedSpellcheck !== null && savedSpellcheck !== undefined) setSpellcheck(savedSpellcheck);
+      if (savedAutoCap !== null && savedAutoCap !== undefined) setAutoCapitalize(savedAutoCap);
       const hasOnboarded = await store.get<boolean>("hasOnboarded");
       if (!hasOnboarded && !saved) {
         setShowOnboarding(true);
@@ -141,10 +145,16 @@ export function App() {
   const handleDeleteConfirm = useCallback(async () => {
     if (!pendingDelete) return;
     try {
-      await invoke("delete_entry", { path: pendingDelete });
-      invoke("delete_file_state", { filePath: pendingDelete }).catch(() => {});
       if (selectedFile === pendingDelete) {
         setSelectedFile(null);
+      }
+      await invoke("delete_entry", { path: pendingDelete });
+      invoke("delete_file_state", { filePath: pendingDelete }).catch(() => {});
+      const { fileContents: fc } = useAppStore.getState();
+      if (fc[pendingDelete]) {
+        const next = { ...fc };
+        delete next[pendingDelete];
+        useAppStore.setState({ fileContents: next });
       }
       await refreshTree();
       syncCards();
@@ -188,7 +198,7 @@ export function App() {
   );
 
   if (loading) {
-    return <div className="h-screen bg-bg" />;
+    return <div className="h-full bg-bg" />;
   }
 
   if (showOnboarding) {
@@ -207,14 +217,14 @@ export function App() {
 
   if (!rootPath) {
     return (
-      <div className="h-screen bg-bg">
+      <div className="h-full bg-bg">
         <EmptyState onOpenFolder={handleOpenFolder} />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-bg">
+    <div className="flex h-full bg-bg">
       <Sidebar
         tree={tree}
         selectedFile={selectedFile}
@@ -228,7 +238,7 @@ export function App() {
         onCreateNote={() => handleRequestCreate("file", getActiveDir())}
         onCreateFolder={() => handleRequestCreate("dir", getActiveDir())}
       />
-      <main className="flex flex-1 flex-col overflow-hidden">
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {viewMode === "settings" ? (
           <Settings />
         ) : viewMode === "review" ? (

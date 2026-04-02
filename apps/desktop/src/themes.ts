@@ -191,6 +191,7 @@ export function applyTheme(theme: Theme, accent: AccentColor) {
     root.style.setProperty("--gitem-hover-strong", "rgba(0,0,0,0.07)");
     root.style.setProperty("--gitem-overlay", "rgba(0,0,0,0.5)");
     root.style.setProperty("--gitem-panel", theme.surface);
+    root.style.setProperty("--color-panel", theme.surface);
     root.style.setProperty("--gitem-scrollbar", "rgba(0,0,0,0.1)");
     root.style.setProperty("--gitem-scrollbar-hover", "rgba(0,0,0,0.2)");
   } else {
@@ -199,6 +200,7 @@ export function applyTheme(theme: Theme, accent: AccentColor) {
     root.style.setProperty("--gitem-hover-strong", "rgba(255,255,255,0.07)");
     root.style.setProperty("--gitem-overlay", "rgba(0,0,0,0.6)");
     root.style.setProperty("--gitem-panel", "#141820");
+    root.style.setProperty("--color-panel", "#141820");
     root.style.setProperty("--gitem-scrollbar", "rgba(255,255,255,0.06)");
     root.style.setProperty("--gitem-scrollbar-hover", "rgba(255,255,255,0.12)");
   }

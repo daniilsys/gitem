@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback, useState, forwardRef, useImperativeHandle } from "react";
 import { EditorState, Compartment, EditorSelection } from "@codemirror/state";
-import { EditorView, keymap, rectangularSelection } from "@codemirror/view";
+import { EditorView, keymap, drawSelection, rectangularSelection } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
 import { syntaxHighlighting, HighlightStyle, bracketMatching } from "@codemirror/language";
@@ -12,32 +12,33 @@ import { clozeHighlight } from "./cloze-decoration";
 import { wysiwygPlugin, clozeAnswerTooltip } from "./wysiwyg";
 import { markdownKeymap } from "./hotkeys";
 import { autoReplace } from "./auto-replace";
+import { autoCapitalize as autoCapExt } from "./auto-capitalize";
 import { headingFold } from "./heading-fold";
 import { Toolbar } from "./Toolbar";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { useAppStore } from "../store";
 
 const gitemHighlight = HighlightStyle.define([
-  { tag: tags.heading1, fontWeight: "700", color: "#f8fafc" },
-  { tag: tags.heading2, fontWeight: "600", color: "#f1f5f9" },
-  { tag: tags.heading3, fontWeight: "600", color: "#e2e8f0" },
-  { tag: tags.heading4, fontWeight: "600", color: "#e2e8f0" },
-  { tag: tags.heading5, fontWeight: "600", color: "#cbd5e1" },
-  { tag: tags.heading6, fontWeight: "600", color: "#94a3b8" },
-  { tag: tags.strong, fontWeight: "700", color: "#e2e8f0" },
-  { tag: tags.emphasis, fontStyle: "italic", color: "#cbd5e1" },
-  { tag: tags.strikethrough, textDecoration: "line-through", color: "#64748b" },
+  { tag: tags.heading1, fontWeight: "700", class: "cm-syn-heading" },
+  { tag: tags.heading2, fontWeight: "600", class: "cm-syn-heading" },
+  { tag: tags.heading3, fontWeight: "600", class: "cm-syn-heading" },
+  { tag: tags.heading4, fontWeight: "600", class: "cm-syn-heading" },
+  { tag: tags.heading5, fontWeight: "600", class: "cm-syn-secondary" },
+  { tag: tags.heading6, fontWeight: "600", class: "cm-syn-muted" },
+  { tag: tags.strong, fontWeight: "700", class: "cm-syn-heading" },
+  { tag: tags.emphasis, fontStyle: "italic", class: "cm-syn-secondary" },
+  { tag: tags.strikethrough, textDecoration: "line-through", class: "cm-syn-muted" },
   { tag: tags.link, textDecoration: "none", class: "cm-syn-accent" },
-  { tag: tags.url, color: "#64748b" },
+  { tag: tags.url, class: "cm-syn-muted" },
   { tag: tags.meta, class: "cm-syn-accent-muted" },
-  { tag: tags.comment, color: "#475569" },
+  { tag: tags.comment, class: "cm-syn-muted" },
   { tag: tags.contentSeparator, class: "cm-syn-accent-muted" },
   { tag: tags.processingInstruction, class: "cm-syn-accent-muted" },
   { tag: tags.monospace, class: "cm-syn-accent" },
-  { tag: tags.keyword, color: "#64748b" },
-  { tag: tags.operator, color: "#64748b" },
-  { tag: tags.punctuation, color: "#475569" },
-  { tag: tags.quote, color: "#94a3b8", fontStyle: "italic" },
+  { tag: tags.keyword, class: "cm-syn-muted" },
+  { tag: tags.operator, class: "cm-syn-muted" },
+  { tag: tags.punctuation, class: "cm-syn-muted" },
+  { tag: tags.quote, fontStyle: "italic", class: "cm-syn-secondary" },
 ]);
 
 interface FileStateResult {
@@ -61,12 +62,14 @@ export function Editor() {
   const viewRef = useRef<EditorView | null>(null);
   const docCompartment = useRef(new Compartment());
   const zoomCompartment = useRef(new Compartment());
+  const spellcheckCompartment = useRef(new Compartment());
+  const autoCapCompartment = useRef(new Compartment());
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentFileRef = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
   const [, forceUpdate] = useState(0);
 
-  const { selectedFile, setFileContent, setDirty, syncCards, editorZoom } = useAppStore();
+  const { selectedFile, setFileContent, setDirty, syncCards, editorZoom, spellcheck, autoCapitalize, locale } = useAppStore();
 
   const saveFile = useCallback(
     async (path: string, content: string) => {
@@ -103,6 +106,7 @@ export function Editor() {
     const state = EditorState.create({
       doc: "",
       extensions: [
+        drawSelection({ cursorBlinkRate: 1000 }),
         rectangularSelection(),
         bracketMatching(),
         history(),
@@ -123,6 +127,15 @@ export function Editor() {
         headingFold,
         docCompartment.current.of([]),
         zoomCompartment.current.of(EditorView.theme({ "&": { fontSize: "14px" } })),
+        spellcheckCompartment.current.of(
+          EditorView.contentAttributes.of({
+            spellcheck: spellcheck ? "true" : "false",
+            autocorrect: "on",
+            autocapitalize: "sentences",
+            lang: locale ?? navigator.language,
+          }),
+        ),
+        autoCapCompartment.current.of(autoCapitalize ? autoCapExt : []),
         EditorView.lineWrapping,
       ],
     });
@@ -154,6 +167,31 @@ export function Editor() {
   useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
+    view.dispatch({
+      effects: spellcheckCompartment.current.reconfigure(
+        EditorView.contentAttributes.of({
+          spellcheck: spellcheck ? "true" : "false",
+          autocorrect: "on",
+          autocapitalize: "sentences",
+          lang: locale ?? navigator.language,
+        }),
+      ),
+    });
+  }, [spellcheck, locale]);
+
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      effects: autoCapCompartment.current.reconfigure(
+        autoCapitalize ? autoCapExt : [],
+      ),
+    });
+  }, [autoCapitalize]);
+
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
     const px = Math.round(14 * (editorZoom / 100));
     view.dispatch({
       effects: zoomCompartment.current.reconfigure(
@@ -164,19 +202,26 @@ export function Editor() {
 
   useEffect(() => {
     const view = viewRef.current;
-    if (!view || !selectedFile) return;
+    if (!view) return;
+
+    if (!selectedFile) {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      currentFileRef.current = null;
+      setReady(false);
+      return;
+    }
 
     setReady(false);
 
     if (currentFileRef.current && currentFileRef.current !== selectedFile) {
       saveCursorState(view, currentFileRef.current);
-    }
-
-    if (saveTimerRef.current) {
-      clearTimeout(saveTimerRef.current);
-      saveTimerRef.current = null;
-      const prevContent = view.state.doc.toString();
-      if (currentFileRef.current && currentFileRef.current !== selectedFile) {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+        const prevContent = view.state.doc.toString();
         setFileContent(currentFileRef.current, prevContent);
         writeTextFile(currentFileRef.current, prevContent).catch(() => {});
       }
@@ -239,11 +284,11 @@ export function Editor() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <Toolbar view={viewRef.current} />
       <div
         ref={containerRef}
-        className={`flex-1 overflow-hidden transition-opacity duration-300 ease-out [&_.cm-editor]:h-full [&_.cm-editor]:outline-none [&_.cm-scroller]:overflow-auto ${
+        className={`min-h-0 flex-1 overflow-hidden transition-opacity duration-300 ease-out [&_.cm-editor]:h-full [&_.cm-editor]:outline-none [&_.cm-scroller]:overflow-auto ${
           ready ? "opacity-100" : "opacity-0"
         }`}
       />
